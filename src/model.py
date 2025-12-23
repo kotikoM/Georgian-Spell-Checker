@@ -3,7 +3,6 @@ import random
 import torch
 from torch import nn
 
-
 GEORGIAN_LETTERS = list("აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ-")
 special_tokens = ["<PAD>", "<SOS>", "<EOS>"]
 
@@ -23,10 +22,12 @@ def decode_sequence(seq):
     chars = [idx2char[i] for i in seq if idx2char[i] not in ["<SOS>", "<EOS>"]]
     return "".join(chars)
 
+
 class CharSeq2Seq(nn.Module):
 
-    def __init__(self, vocab_size, embed_dim=64, hidden_dim=256):
+    def __init__(self, embed_dim=64, hidden_dim=256):
         super().__init__()
+        self.vocab_size = vocab_size
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.encoder = nn.LSTM(embed_dim, hidden_dim, num_layers=2, batch_first=True, dropout=0.2)
         self.decoder = nn.LSTM(embed_dim, hidden_dim, num_layers=2, batch_first=True, dropout=0.2)
@@ -50,7 +51,6 @@ class CharSeq2Seq(nn.Module):
 
             pred = output.argmax(2)
             outputs[:, t, :] = output.squeeze(1)
-
 
             if tgt is not None and random.random() < teacher_forcing_ratio:
                 input_token = tgt[:, t].unsqueeze(1)
