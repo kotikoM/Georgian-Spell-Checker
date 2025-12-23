@@ -6,8 +6,9 @@ from torch.utils.data import Dataset
 import random
 import time
 
-from src.model import CharSeq2Seq, vocab_size, encode_word, PAD_IDX
+from src.model import CharSeq2Seq, encode_word, PAD_IDX
 from src.word_augmentation import get_corrupted_words
+
 
 class SpellDataset(Dataset):
     def __init__(self, pairs):
@@ -50,12 +51,11 @@ dataset = [
 ]
 print(f'Generated {len(dataset)} corrupted pairs from {len(words)} words')
 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 pin_memory = (device.type == "cuda")
 print(f"Device: {device}")
 
-model = CharSeq2Seq(vocab_size).to(device)
+model = CharSeq2Seq().to(device)
 criterion = nn.CrossEntropyLoss(ignore_index=PAD_IDX)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -96,7 +96,7 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
         output = model(src, tgt)
         loss = criterion(
-            output.view(-1, vocab_size),
+            output.view(-1, model.vocab_size),
             tgt.view(-1)
         )
         loss.backward()
@@ -104,7 +104,6 @@ for epoch in range(num_epochs):
 
         train_loss += loss.item()
     avg_train_loss = train_loss / len(train_loader)
-
 
     model.eval()
     val_loss = 0
@@ -116,7 +115,7 @@ for epoch in range(num_epochs):
             teacher_forcing_ratio = max(0.5, 1.0 - epoch / num_epochs)
             output = model(src, tgt, teacher_forcing_ratio=0.0)
             loss = criterion(
-                output.view(-1, vocab_size),
+                output.view(-1, model.vocab_size),
                 tgt.view(-1)
             )
             val_loss += loss.item()
@@ -131,15 +130,15 @@ for epoch in range(num_epochs):
     )
 
     # --- Save checkpoint -- optional ---
-    checkpoint_path = f"checkpoint_epoch_{epoch + 1}.pth"
-    torch.save({
-        "epoch": epoch + 1,
-        "model_state_dict": model.state_dict(),
-        "optimizer_state_dict": optimizer.state_dict(),
-        "train_loss": avg_train_loss,
-        "val_loss": avg_val_loss
-    }, checkpoint_path)
-    print(f"Checkpoint saved: {checkpoint_path}")
+    # checkpoint_path = f"checkpoint_epoch_{epoch + 1}.pth"
+    # torch.save({
+    #     "epoch": epoch + 1,
+    #     "model_state_dict": model.state_dict(),
+    #     "optimizer_state_dict": optimizer.state_dict(),
+    #     "train_loss": avg_train_loss,
+    #     "val_loss": avg_val_loss
+    # }, checkpoint_path)
+    # print(f"Checkpoint saved: {checkpoint_path}")
 
 # final save
 final_model_path = "georgian_spellcheck_model_final.pth"
