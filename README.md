@@ -32,8 +32,12 @@ model.load_state_dict(torch.load("trained/georgian_spellcheck_model_final.pth"))
 print(model.correct_word("ფანჯრა"))  # Output: ფანჯარა
 ```
 
-## Conclusion
+## Notebooks
 
-While the model is not perfect, it successfully demonstrates how a character-level Seq2Seq architecture can master
-Georgian orthography and repair common human errors.
-By learning the language's consistent phonetic patterns, it can recover complex roots even from significant corruption
+### Generate Data and Train
+Open `data_and_training.ipynb`. This notebook takes you through word scraping, corrupted word generation and model training. It also saves model weights.
+Run Inference
+
+
+### Run Inference
+Open `inference.ipynb`. This notebook implements the correct_word(word: str, model: Seq2Seq) function and shows the model correcting input examples.
